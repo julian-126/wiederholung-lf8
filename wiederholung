@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wiederholung LF 8 – GoB · Inventur & Inventar · Bilanzveränderungen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card-bg: #ffffff;
+      --accent: #2b6cb0;
+      --accent-soft: #e3f2fd;
+      --accent-strong: #1a4b80;
+      --danger: #c53030;
+      --text: #1a202c;
+      --muted: #4a5568;
+      --border: #d1d5db;
+      --radius-lg: 14px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, #e0f2fe, #f5f7fb 40%, #edf2ff);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      margin: 0 0 6px;
+      color: var(--accent-strong);
+    }
+
+    header p {
+      margin: 2px 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(37, 99, 235, 0.07);
+      color: var(--accent-strong);
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 2.1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 18px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card h2 span.icon {
+      font-size: 1.2rem;
+    }
+
+    .topics {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .topic-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.9rem;
+    }
+
+    .topic-button span.label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .topic-button strong {
+      font-size: 0.96rem;
+    }
+
+    .topic-button small {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .topic-button .badge {
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 0.7rem;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      border: 1px solid rgba(37, 99, 235, 0.28);
+    }
+
+    .topic-button.active {
+      background: linear-gradient(120deg, #e0f2fe, #eef2ff);
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .topic-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    .self-check {
+      margin-top: 10px;
+      border-top: 1px dashed var(--border);
+      padding-top: 8px;
+    }
+
+    .self-check p {
+      margin: 0 0 4px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .self-check .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      border-radius: var(--radius-pill);
+      border: 1px dashed var(--border);
+      padding: 2px 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .content {
+      min-height: 420px;
+    }
+
+    .topic-section {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .topic-section.active {
+      display: block;
+    }
+
+    .pill-heading {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      background: #edf2ff;
+      color: var(--accent-strong);
+      font-size: 0.75rem;
+      margin-bottom: 4px;
+    }
+
+    .topic-section h3 {
+      margin: 4px 0 8px;
+      font-size: 1.1rem;
+    }
+
+    .topic-section p {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .info-box {
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #f9fafb;
+      border: 1px dashed var(--border);
+      font-size: 0.82rem;
+      margin-bottom: 10px;
+    }
+
+    .info-box strong {
+      color: var(--accent-strong);
+    }
+
+    .questions {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .question {
+      border-radius: 10px;
+      background: #fdfdfd;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .question-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .difficulty {
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .question-body {
+      font-size: 0.86rem;
+      margin-bottom: 4px;
+    }
+
+    .question-body ul {
+      margin: 4px 0 4px 18px;
+      padding: 0;
+    }
+
+    .question-body li {
+      margin-bottom: 2px;
+    }
+
+    .choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 4px 0 6px;
+    }
+
+    .choice-btn {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .choice-btn.correct {
+      border-color: #2f855a;
+      background: #e6fffa;
+    }
+
+    .choice-btn.wrong {
+      border-color: var(--danger);
+      background: #fff5f5;
+    }
+
+    .solution-toggle {
+      font-size: 0.8rem;
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      border: none;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .solution {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: var(--accent-soft);
+      font-size: 0.82rem;
+      display: none;
+    }
+
+    .solution.visible {
+      display: block;
+    }
+
+    .solution strong {
+      color: var(--accent-strong);
+    }
+
+    .frei-text {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 50px;
+      resize: vertical;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.84rem;
+      margin-top: 4px;
+    }
+
+    textarea:focus {
+      outline: 2px solid var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 18px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Wiederholung LF 8 – EH 11</h1>
+      <p>Grundsätze ordnungsgemäßer Buchführung · Inventur &amp; Inventar · Bilanz &amp; Bilanzveränderungen</p>
+      <div class="tagline">
+        <span>✅</span>
+        <span>Nutze die Aufgaben zur Selbstkontrolle – Lösungen kannst du einblenden.</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- Seitenleiste: Themenwahl -->
+      <aside class="card">
+        <h2><span class="icon">📂</span> Thementeile</h2>
+        <div class="topics">
+          <button class="topic-button active" data-topic="gob">
+            <span class="label">
+              <strong>1. GoB – ordentlich buchen</strong>
+              <small>Grundsätze ordnungsgemäßer Buchführung</small>
+            </span>
+            <span class="badge">EH 11 · KSK</span>
+          </button>
+
+          <button class="topic-button" data-topic="inventur">
+            <span class="label">
+              <strong>2. Inventur &amp; Inventar</strong>
+              <small>Vermögen, Schulden, Eigenkapital</small>
+            </span>
+            <span class="badge">Ambiente Warenhaus AG</span>
+          </button>
+
+          <button class="topic-button" data-topic="bilanz">
+            <span class="label">
+              <strong>3. Bilanz &amp; Bilanzveränderungen</strong>
+              <small>Aktiva · Passiva · 4 Arten der Veränderung</small>
+            </span>
+            <span class="badge">Ambiente Warenhaus AG</span>
+          </button>
+        </div>
+
+        <div class="self-check">
+          <p>🎯 Check: „Ich kann …“</p>
+          <div class="chips">
+            <span class="chip">GoB erklären &amp; Verstöße erkennen</span>
+            <span class="chip">Inventur / Inventar / Bilanz unterscheiden</span>
+            <span class="chip">Vermögen &amp; Schulden zuordnen</span>
+            <span class="chip">Arten der Bilanzveränderung bestimmen</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Hauptbereich: Aufgaben -->
+      <main class="card content">
+        <!-- Thema 1: GoB -->
+        <section class="topic-section active" id="gob">
+          <div class="pill-heading">Thema 1 · GoB – Grundsätze ordnungsgemäßer Buchführung</div>
+          <h3>Wozu braucht man GoB?</h3>
+          <p>
+            Die Grundsätze ordnungsgemäßer Buchführung (GoB) legen fest, wie Buchführung richtig,
+            vollständig und nachvollziehbar sein muss. Sie sollen sicherstellen, dass ein
+            sachverständiger Dritter in angemessener Zeit einen Überblick über Geschäftsvorfälle
+            und Vermögenslage gewinnen kann.
+          </p>
+          <p class="hint">
+            Bearbeite die Fragen. Schreibe deine Antworten in die Felder und blende danach die Lösungen ein.
+          </p>
+
+          <div class="info-box">
+            <strong>Merksatz:</strong> „Nur wer vollständig, richtig und ordentlich bucht,
+            kann den Überblick behalten und Ärger mit dem Finanzamt vermeiden.“
+          </div>
+
+          <div class="questions">
+            <!-- Frage 1 -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">1. Was sind GoB und warum sind sie wichtig?</div>
+                <div class="difficulty">Basiswissen</div>
+              </div>
+              <div class="question-body">
+                Erkläre in 2–3 Sätzen:
+                <ul>
+                  <li>Was versteht man unter Grundsätzen ordnungsgemäßer Buchführung?</li>
+                  <li>Warum kann es „Ärger“ geben, wenn man sie nicht beachtet?</li>
+                </ul>
+              </div>
+              <div class="frei-text">✏️ Dein Antwortversuch:</div>
+              <textarea placeholder="Notiere hier deine Erklärung …"></textarea>
+              <button class="solution-toggle" data-target="gob-sol1">Lösung anzeigen</button>
+              <div class="solution" id="gob-sol1">
+                <strong>Musterlösung:</strong><br />
+                GoB sind Regeln, wie Buchführung richtig, vollständig, übersichtlich und
+                nachvollziehbar sein muss. Werden sie nicht beachtet, können falsche oder fehlende
+                Belege zu Problemen mit dem Finanzamt (Strafen, Nachzahlungen), zum Verlust des
+                Überblicks im Unternehmen und zu Vertrauensverlust bei Banken, Chefs oder
+                Geschäftspartnern führen.
+              </div>
+            </div>
+
+            <!-- Frage 2 -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">2. Die fünf wichtigsten Grundsätze</div>
+                <div class="difficulty">Merken &amp; Anwenden</div>
+              </div>
+              <div class="question-body">
+                Nenne die fünf Grundsätze und gib jeweils ein kurzes Beispiel aus dem Kassenalltag.
+              </div>
+              <div class="frei-text">✏️ Deine Liste:</div>
+              <textarea placeholder="1. ...&#10;2. ...&#10;3. ...&#10;4. ...&#10;5. ..."></textarea>
+              <button class="solution-toggle" data-target="gob-sol2">Lösung anzeigen</button>
+              <div class="solution" id="gob-sol2">
+                <strong>Musterlösung – 5 GoB mit Beispielen:</strong>
+                <ul>
+                  <li><strong>Vollständigkeit:</strong> Alle Geschäftsfälle müssen erfasst werden. Kein Beleg darf fehlen.</li>
+                  <li><strong>Richtigkeit:</strong> Zahlen und Belege müssen stimmen, keine Schätzungen oder Fantasiezahlen.</li>
+                  <li><strong>Klarheit &amp; Übersichtlichkeit:</strong> Buchführung muss lesbar und nachvollziehbar sein (kein Bleistift, keine Radierungen, saubere Reihenfolge).</li>
+                  <li><strong>Zeitgerechtheit:</strong> Buchungen müssen zeitnah erfolgen, nicht erst Wochen später.</li>
+                  <li><strong>Aufbewahrung:</strong> Belege und Unterlagen müssen sicher und lange (meist 10 Jahre) aufgehoben werden.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Frage 3: Zuordnung Verstöße -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">3. Verstöße gegen GoB zuordnen</div>
+                <div class="difficulty">Anwendung</div>
+              </div>
+              <div class="question-body">
+                Ordne die folgenden Fälle dem passenden Grundsatz zu. Klicke die richtige Lösung an
+                (du kannst mehrere Versuche machen).
+              </div>
+              <div class="question-body">
+                <strong>Fall A:</strong> Eine Woche im Kassenbuch fehlt, weil der Mitarbeiter krank war.
+              </div>
+              <div class="choices" data-correct="Vollständigkeit">
+                <button class="choice-btn">Vollständigkeit</button>
+                <button class="choice-btn">Richtigkeit</button>
+                <button class="choice-btn">Zeitgerechtheit</button>
+              </div>
+
+              <div class="question-body" style="margin-top:6px;">
+                <strong>Fall B:</strong> Im Kassenbuch werden Beträge geschätzt, wenn kein Beleg da ist.
+              </div>
+              <div class="choices" data-correct="Richtigkeit">
+                <button class="choice-btn">Richtigkeit</button>
+                <button class="choice-btn">Klarheit &amp; Übersichtlichkeit</button>
+                <button class="choice-btn">Aufbewahrung</button>
+              </div>
+
+              <div class="question-body" style="margin-top:6px;">
+                <strong>Fall C:</strong> Es wird mit Bleistift geschrieben, damit man radieren kann.
+              </div>
+              <div class="choices" data-correct="Klarheit &amp; Übersichtlichkeit">
+                <button class="choice-btn">Zeitgerechtheit</button>
+                <button class="choice-btn">Klarheit &amp; Übersichtlichkeit</button>
+                <button class="choice-btn">Aufbewahrung</button>
+              </div>
+
+              <button class="solution-toggle" data-target="gob-sol3">Lösung anzeigen</button>
+              <div class="solution" id="gob-sol3">
+                <strong>Lösungen:</strong><br />
+                Fall A → Verstoß gegen <strong>Vollständigkeit</strong>.<br />
+                Fall B → Verstoß gegen <strong>Richtigkeit</strong>.<br />
+                Fall C → Verstoß gegen <strong>Klarheit &amp; Übersichtlichkeit</strong>.
+              </div>
+            </div>
+
+            <!-- Frage 4: Einnahmen-/Ausgaben -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">4. Einnahmen-/Ausgabenrechnung – Betriebserfolg</div>
+                <div class="difficulty">Rechnen</div>
+              </div>
+              <div class="question-body">
+                Auszug aus dem Einnahmen-/Ausgabenbuch des Modegeschäfts „Trend &amp; Style“:
+                <ul>
+                  <li>Summe Einnahmen: 3.610,00 €</li>
+                  <li>Summe Ausgaben: 1.558,00 €</li>
+                </ul>
+                Berechne den Betriebserfolg (Gewinn) des Tages.
+              </div>
+              <div class="frei-text">✏️ Deine Rechnung:</div>
+              <textarea placeholder="Betriebserfolg = ..."></textarea>
+              <button class="solution-toggle" data-target="gob-sol4">Lösung anzeigen</button>
+              <div class="solution" id="gob-sol4">
+                <strong>Musterlösung:</strong><br />
+                Betriebserfolg = Summe Einnahmen − Summe Ausgaben<br />
+                = 3.610,00 € − 1.558,00 €<br />
+                = <strong>2.052,00 € Gewinn</strong>.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Thema 2: Inventur & Inventar -->
+        <section class="topic-section" id="inventur">
+          <div class="pill-heading">Thema 2 · Inventur &amp; Inventar</div>
+          <h3>Wie findet ein Unternehmen heraus, was es „wert“ ist?</h3>
+          <p>
+            Durch eine Inventur erfasst ein Unternehmen alle Vermögensgegenstände und Schulden
+            zu einem bestimmten Zeitpunkt. Das Ergebnis ist das Inventar – ein geordnetes
+            Verzeichnis von Vermögen, Schulden und dem daraus folgenden Eigenkapital.
+          </p>
+          <p class="hint">
+            Wiederhole die Begriffe und ordne die Positionen richtig zu. Nutze die Lösungen zur Selbstkontrolle.
+          </p>
+
+          <div class="info-box">
+            <strong>Wichtig:</strong> Inventur = Zählen/Messen/Wiegen/Bewerten,
+            Inventar = Ergebnis in Tabellenform, Bilanz = stark zusammengefasste Gegenüberstellung
+            von Vermögen und Kapital.
+          </div>
+
+          <div class="questions">
+            <!-- Frage 1 -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">1. Inventur, Inventar, Bilanz – die Unterschiede</div>
+                <div class="difficulty">Basiswissen</div>
+              </div>
+              <div class="question-body">
+                Erkläre mit eigenen Worten:
+                <ul>
+                  <li>Was ist eine <strong>Inventur</strong>?</li>
+                  <li>Was ist ein <strong>Inventar</strong>?</li>
+                  <li>Wie unterscheidet sich die <strong>Bilanz</strong> davon?</li>
+                </ul>
+              </div>
+              <div class="frei-text">✏️ Deine Erklärung:</div>
+              <textarea placeholder="Inventur = ...&#10;Inventar = ...&#10;Bilanz = ..."></textarea>
+              <button class="solution-toggle" data-target="inv-sol1">Lösung anzeigen</button>
+              <div class="solution" id="inv-sol1">
+                <strong>Musterlösung (kompakt):</strong>
+                <ul>
+                  <li><strong>Inventur:</strong> Tatsächliches Erfassen aller Vermögensgegenstände und Schulden eines Unternehmens zu einem bestimmten Zeitpunkt (z. B. durch Zählen, Messen, Wiegen, Bewerten).</li>
+                  <li><strong>Inventar:</strong> Schriftliches, geordnetes Verzeichnis aller Vermögenswerte und Schulden mit Einzelbeträgen und Summen; zeigt auch das Eigenkapital.</li>
+                  <li><strong>Bilanz:</strong> Stärker zusammengefasste Gegenüberstellung von Vermögen (Aktiva) und Kapital/Schulden (Passiva) am Ende des Geschäftsjahres.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Frage 2: Zuordnung Vermögen -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">2. Anlage- oder Umlaufvermögen?</div>
+                <div class="difficulty">Zuordnen</div>
+              </div>
+              <div class="question-body">
+                Entscheide, ob die folgenden Positionen zum Anlage- oder Umlaufvermögen gehören.
+                Klicke eine Antwort:
+              </div>
+
+              <div class="question-body" style="margin-top:4px;">
+                <strong>Posten A:</strong> Verkaufsgebäude Bahnhofstraße 12 in Mühldorf a. Inn
+              </div>
+              <div class="choices" data-correct="Anlagevermögen">
+                <button class="choice-btn">Anlagevermögen</button>
+                <button class="choice-btn">Umlaufvermögen</button>
+              </div>
+
+              <div class="question-body" style="margin-top:4px;">
+                <strong>Posten B:</strong> Kassenbestand
+              </div>
+              <div class="choices" data-correct="Umlaufvermögen">
+                <button class="choice-btn">Anlagevermögen</button>
+                <button class="choice-btn">Umlaufvermögen</button>
+              </div>
+
+              <div class="question-body" style="margin-top:4px;">
+                <strong>Posten C:</strong> Regale, Tische und Dekoration im Verkaufsraum
+              </div>
+              <div class="choices" data-correct="Anlagevermögen">
+                <button class="choice-btn">Anlagevermögen</button>
+                <button class="choice-btn">Umlaufvermögen</button>
+              </div>
+
+              <div class="question-body" style="margin-top:4px;">
+                <strong>Posten D:</strong> Bankguthaben bei Raiffeisenbank
+              </div>
+              <div class="choices" data-correct="Umlaufvermögen">
+                <button class="choice-btn">Anlagevermögen</button>
+                <button class="choice-btn">Umlaufvermögen</button>
+              </div>
+
+              <button class="solution-toggle" data-target="inv-sol2">Lösung anzeigen</button>
+              <div class="solution" id="inv-sol2">
+                <strong>Lösungen:</strong><br />
+                A → Anlagevermögen (bebautes Grundstück/Gebäude).<br />
+                B → Umlaufvermögen (Kassenbestand).<br />
+                C → Anlagevermögen (Betriebs- und Geschäftsausstattung).<br />
+                D → Umlaufvermögen (Bankguthaben).
+              </div>
+            </div>
+
+            <!-- Frage 3: Schulden -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">3. Kurz- oder langfristige Verbindlichkeiten?</div>
+                <div class="difficulty">Zuordnen</div>
+              </div>
+              <div class="question-body">
+                Entscheide, ob es sich um kurzfristige oder langfristige Schulden handelt:
+              </div>
+
+              <div class="question-body" style="margin-top:4px;">
+                <strong>Fall 1:</strong> Noch nicht bezahlte Stromrechnung (2.938,11 €)
+              </div>
+              <div class="choices" data-correct="kurzfristig">
+                <button class="choice-btn">kurzfristige Verbindlichkeiten</button>
+                <button class="choice-btn">langfristige Verbindlichkeiten</button>
+              </div>
+
+              <div class="question-body" style="margin-top:4px;">
+                <strong>Fall 2:</strong> Langfristiges Darlehen bei der Sparkasse (25.000,00 €)
+              </div>
+              <div class="choices" data-correct="langfristig">
+                <button class="choice-btn">kurzfristige Verbindlichkeiten</button>
+                <button class="choice-btn">langfristige Verbindlichkeiten</button>
+              </div>
+
+              <button class="solution-toggle" data-target="inv-sol3">Lösung anzeigen</button>
+              <div class="solution" id="inv-sol3">
+                <strong>Lösungen:</strong><br />
+                Fall 1 → kurzfristige Verbindlichkeit (Rechnung wird innerhalb eines Jahres bezahlt).<br />
+                Fall 2 → langfristige Verbindlichkeit (Darlehen läuft über mehr als ein Jahr).
+              </div>
+            </div>
+
+            <!-- Frage 4: Eigenkapital -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">4. Eigenkapital der Ambiente Warenhaus AG</div>
+                <div class="difficulty">Rechnen</div>
+              </div>
+              <div class="question-body">
+                Aus dem Inventar der Ambiente Warenhaus AG zum 31.12.2024:
+                <ul>
+                  <li>Summe des Vermögens (A): 200.588,99 €</li>
+                  <li>Summe der Schulden (B): 28.526,11 €</li>
+                </ul>
+                Berechne das Eigenkapital zum 31.12.2024.
+              </div>
+              <div class="frei-text">✏️ Deine Rechnung:</div>
+              <textarea placeholder="Eigenkapital = ..."></textarea>
+              <button class="solution-toggle" data-target="inv-sol4">Lösung anzeigen</button>
+              <div class="solution" id="inv-sol4">
+                <strong>Musterlösung:</strong><br />
+                Eigenkapital = Summe des Vermögens − Summe der Schulden<br />
+                = 200.588,99 € − 28.526,11 €<br />
+                = <strong>172.062,88 €</strong>.
+              </div>
+            </div>
+
+            <!-- Zusatzfrage -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">5. Zusatzfrage – Warum Inventur und Inventar?</div>
+                <div class="difficulty">Transfer</div>
+              </div>
+              <div class="question-body">
+                Erkläre in 1–2 Sätzen, warum es wichtig ist, dass Unternehmen regelmäßig eine Inventur
+                durchführen und ein Inventar erstellen.
+              </div>
+              <textarea placeholder="Deine Begründung …"></textarea>
+              <button class="solution-toggle" data-target="inv-sol5">Lösung anzeigen</button>
+              <div class="solution" id="inv-sol5">
+                <strong>Musterlösung (Beispiel):</strong><br />
+                Damit das Unternehmen jederzeit genau weiß, welche Vermögenswerte und Schulden
+                vorhanden sind und wie hoch das Eigenkapital ist. Nur so kann eine korrekte Bilanz
+                erstellt werden und die Geschäftsleitung kann sichere Entscheidungen treffen.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Thema 3: Bilanz & Bilanzveränderungen -->
+        <section class="topic-section" id="bilanz">
+          <div class="pill-heading">Thema 3 · Bilanz &amp; Bilanzveränderungen</div>
+          <h3>Wie verändert sich die Bilanz durch Geschäftsvorfälle?</h3>
+          <p>
+            Die Bilanz stellt am Ende eines Geschäftsjahres Vermögen (Aktiva) und Kapital/Schulden
+            (Passiva) gegenüber. Jeder Geschäftsvorfall kann bestimmte Bilanzpositionen erhöhen oder
+            verringern – so entstehen verschiedene Arten von Bilanzveränderungen.
+          </p>
+          <p class="hint">
+            Wiederhole die Begriffe Aktiva/Passiva und bestimme die Art der Bilanzveränderung.
+          </p>
+
+          <div class="info-box">
+            <strong>Merke:</strong> Aktiva = Mittelverwendung (Wofür wird das Geld verwendet?) ·
+            Passiva = Mittelherkunft (Woher stammt das Geld?).
+          </div>
+
+          <div class="questions">
+            <!-- Frage 1 -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">1. Aufbau der Bilanz</div>
+                <div class="difficulty">Basiswissen</div>
+              </div>
+              <div class="question-body">
+                a) Wie heißen die beiden Seiten der Bilanz?<br />
+                b) Was steht jeweils dort?
+              </div>
+              <div class="frei-text">✏️ Deine Antwort:</div>
+              <textarea placeholder="Aktiva = ...&#10;Passiva = ..."></textarea>
+              <button class="solution-toggle" data-target="bil-sol1">Lösung anzeigen</button>
+              <div class="solution" id="bil-sol1">
+                <strong>Musterlösung:</strong><br />
+                Die Bilanz besteht aus:<br />
+                <strong>Aktiva (Vermögen):</strong> Hier stehen die Vermögenswerte des Unternehmens,
+                also wofür das Geld verwendet wurde (z. B. Anlagevermögen und Umlaufvermögen).<br />
+                <strong>Passiva (Kapital):</strong> Hier steht, woher das Kapital stammt – eigenes
+                Kapital (Eigenkapital) und Schulden bei Dritten (Fremdkapital/Verbindlichkeiten,
+                Darlehen).
+              </div>
+            </div>
+
+            <!-- Frage 2: 4 Arten -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">2. Die vier Arten von Bilanzveränderungen</div>
+                <div class="difficulty">Merken</div>
+              </div>
+              <div class="question-body">
+                Nenne die vier grundlegenden Arten von Bilanzveränderungen und beschreibe kurz,
+                was dabei mit der Bilanzsumme passiert.
+              </div>
+              <textarea placeholder="1) ...&#10;2) ...&#10;3) ...&#10;4) ..."></textarea>
+              <button class="solution-toggle" data-target="bil-sol2">Lösung anzeigen</button>
+              <div class="solution" id="bil-sol2">
+                <strong>Musterlösung:</strong>
+                <ul>
+                  <li><strong>Aktivtausch:</strong> Zwei Positionen auf der Aktivseite ändern sich (eine steigt, eine sinkt); die Bilanzsumme bleibt gleich.</li>
+                  <li><strong>Passivtausch:</strong> Zwei Positionen auf der Passivseite ändern sich (eine steigt, eine sinkt); die Bilanzsumme bleibt gleich.</li>
+                  <li><strong>Bilanzverlängerung:</strong> Ein Aktivposten und ein Passivposten steigen; die Bilanzsumme wird größer.</li>
+                  <li><strong>Bilanzverkürzung:</strong> Ein Aktivposten und ein Passivposten sinken; die Bilanzsumme wird kleiner.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Frage 3: Kaffeemaschinen -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">3. Neue Kaffeemaschinen auf Ziel</div>
+                <div class="difficulty">Anwendung</div>
+              </div>
+              <div class="question-body">
+                Die Ambiente Warenhaus AG erhält neue Designer-Kaffeemaschinen im Wert von 8.000 €.
+                Die Rechnung wird erst später bezahlt (Kauf auf Ziel).
+                <ul>
+                  <li>Welche Bilanzposten verändern sich?</li>
+                  <li>Wie verändern sie sich (↑ / ↓)?</li>
+                  <li>Welche Art von Bilanzveränderung liegt vor?</li>
+                </ul>
+              </div>
+              <textarea placeholder="Betroffene Werte: ...&#10;Veränderung: ...&#10;Art der Bilanzveränderung: ..."></textarea>
+              <button class="solution-toggle" data-target="bil-sol3">Lösung anzeigen</button>
+              <div class="solution" id="bil-sol3">
+                <strong>Musterlösung:</strong><br />
+                Betroffene Werte: Warenbestand (Aktiva) und Verbindlichkeiten (Passiva).<br />
+                Veränderung: Warenbestand ↑, Verbindlichkeiten ↑.<br />
+                Art der Bilanzveränderung: <strong>Bilanzverlängerung</strong>, weil Vermögen und
+                Schulden steigen und die Bilanzsumme größer wird.
+              </div>
+            </div>
+
+            <!-- Frage 4: Lieferantenrechnung bezahlen -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">4. Lieferantenrechnung wird per Bank überwiesen</div>
+                <div class="difficulty">Anwendung</div>
+              </div>
+              <div class="question-body">
+                Eine offene Lieferantenrechnung wird per Banküberweisung bezahlt.
+                <ul>
+                  <li>Welche Bilanzposten sind betroffen?</li>
+                  <li>Wie verändern sie sich?</li>
+                  <li>Wie heißt die Bilanzveränderungsart?</li>
+                </ul>
+              </div>
+              <div class="choices" data-correct="Bilanzverkürzung">
+                <button class="choice-btn">Aktivtausch</button>
+                <button class="choice-btn">Passivtausch</button>
+                <button class="choice-btn">Bilanzverlängerung</button>
+                <button class="choice-btn">Bilanzverkürzung</button>
+              </div>
+              <textarea placeholder="Begründe deine Auswahl …"></textarea>
+              <button class="solution-toggle" data-target="bil-sol4">Lösung anzeigen</button>
+              <div class="solution" id="bil-sol4">
+                <strong>Musterlösung:</strong><br />
+                Betroffene Werte: Bank (Aktiva) und Verbindlichkeiten (Passiva).<br />
+                Veränderung: Bank ↓, Verbindlichkeiten ↓.<br />
+                Art: <strong>Bilanzverkürzung</strong>, weil Vermögen und Schulden gleichzeitig
+                sinken – die Bilanzsumme wird kleiner.
+              </div>
+            </div>
+
+            <!-- Frage 5: Bargeld auf Bankkonto -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">5. Bargeld wird auf das Bankkonto eingezahlt</div>
+                <div class="difficulty">Anwendung</div>
+              </div>
+              <div class="question-body">
+                Die Ambiente Warenhaus AG zahlt 2.000 € aus der Kasse auf das Bankkonto ein.
+                <ul>
+                  <li>Welche Bilanzposten sind betroffen?</li>
+                  <li>Wie verändern sie sich?</li>
+                  <li>Welche Art der Bilanzveränderung liegt vor?</li>
+                </ul>
+              </div>
+              <div class="choices" data-correct="Aktivtausch">
+                <button class="choice-btn">Aktivtausch</button>
+                <button class="choice-btn">Passivtausch</button>
+                <button class="choice-btn">Bilanzverlängerung</button>
+                <button class="choice-btn">Bilanzverkürzung</button>
+              </div>
+              <textarea placeholder="Deine Begründung …"></textarea>
+              <button class="solution-toggle" data-target="bil-sol5">Lösung anzeigen</button>
+              <div class="solution" id="bil-sol5">
+                <strong>Musterlösung:</strong><br />
+                Betroffene Werte: Kasse (Aktiva) und Bank (Aktiva).<br />
+                Veränderung: Kasse ↓, Bank ↑.<br />
+                Art: <strong>Aktivtausch</strong>, weil sich nur zwei Aktivposten in
+                entgegengesetzter Richtung verändern und die Bilanzsumme gleich bleibt.
+              </div>
+            </div>
+
+            <!-- Zusatzfrage -->
+            <div class="question">
+              <div class="question-header">
+                <div class="question-title">6. Zusatzfrage – Warum Bilanzveränderungen verstehen?</div>
+                <div class="difficulty">Transfer</div>
+              </div>
+              <div class="question-body">
+                Erkläre in 1–2 Sätzen, warum es wichtig ist, dass Unternehmen Bilanzveränderungen
+                verstehen und dokumentieren.
+              </div>
+              <textarea placeholder="Deine Begründung …"></textarea>
+              <button class="solution-toggle" data-target="bil-sol6">Lösung anzeigen</button>
+              <div class="solution" id="bil-sol6">
+                <strong>Musterlösung (Beispiel):</strong><br />
+                Nur wenn alle Bilanzveränderungen korrekt erfasst werden, zeigt die Bilanz die
+                tatsächliche Vermögens- und Finanzlage. Das Unternehmen kann dann richtige
+                Entscheidungen treffen und gegenüber Banken, Eigentümern und dem Finanzamt
+                nachvollziehbar Rechenschaft ablegen.
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="footer-note">
+      Tipp: Nutze das Dokument zur Vorbereitung auf Schulaufgabe/Ex – erst selbst lösen, dann Lösungen einblenden.
+    </div>
+  </div>
+
+  <script>
+    // Tabs zwischen den Themen
+    const topicButtons = document.querySelectorAll(".topic-button");
+    const topicSections = document.querySelectorAll(".topic-section");
+
+    topicButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-topic");
+
+        topicButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        topicSections.forEach((sec) => {
+          sec.classList.toggle("active", sec.id === target);
+        });
+      });
+    });
+
+    // Lösung ein-/ausblenden
+    document.querySelectorAll(".solution-toggle").forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetId = button.getAttribute("data-target");
+        const solution = document.getElementById(targetId);
+        if (!solution) return;
+        const visible = solution.classList.toggle("visible");
+        button.textContent = visible ? "Lösung ausblenden" : "Lösung anzeigen";
+      });
+    });
+
+    // Multiple-Choice-Auswahl mit sofortigem Feedback
+    document.querySelectorAll(".choices").forEach((choiceGroup) => {
+      const correctLabel = choiceGroup.getAttribute("data-correct");
+      const buttons = choiceGroup.querySelectorAll(".choice-btn");
+
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          buttons.forEach((b) => {
+            b.classList.remove("correct", "wrong");
+          });
+
+          if (btn.textContent.trim() === correctLabel) {
+            btn.classList.add("correct");
+          } else {
+            btn.classList.add("wrong");
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
